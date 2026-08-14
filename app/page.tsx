@@ -1,6 +1,12 @@
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
 
-export default function Home() {
+export default async function Home() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <main className="min-h-screen flex flex-col">
       {/* Top bar */}
@@ -11,13 +17,29 @@ export default function Home() {
             Tagged
           </span>
         </div>
-        <nav className="flex gap-6 font-body text-sm font-medium text-ink/80">
+        <nav className="flex items-center gap-6 font-body text-sm font-medium text-ink/80">
           <Link href="/browse" className="hover:text-teal transition-colors">
             Browse items
           </Link>
-          <Link href="/login" className="hover:text-teal transition-colors">
-            Log in
-          </Link>
+          {user ? (
+            <>
+              <span className="text-ink/50 text-xs font-tag uppercase tracking-wide">
+                {user.email}
+              </span>
+              <form action="/auth/signout" method="post">
+                <button
+                  type="submit"
+                  className="hover:text-brick transition-colors"
+                >
+                  Log out
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link href="/login" className="hover:text-teal transition-colors">
+              Log in
+            </Link>
+          )}
         </nav>
       </header>
 
